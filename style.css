@@ -104,3 +104,8 @@ button:hover{
     background-color:green;
     border:3px solid #2b2d42;
 }
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}

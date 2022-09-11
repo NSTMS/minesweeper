@@ -133,8 +133,6 @@ document.getElementById("main_content").addEventListener("click" ,(event)=>{
     cubesReveal(helper[event.target.id])
 })
 
-
-
 function cubesReveal(cube)
 {   
     areYouWinningSon()
@@ -168,7 +166,7 @@ function cubesReveal(cube)
             else if(cube.minesAround != 0 && checked == true){
                 document.getElementById(cube.id).style.background = "blue"
                 document.getElementById(cube.id).innerText = cube.minesAround
-                document.getElementById(cube.id).style.pointerEvents = "none";
+                document.getElementById(cube.id).style.pointerEvents = "none"
 
                 wasChecked.splice(wasChecked.indexOf(cube.id),1)
                 areYouWinningSon()
@@ -196,7 +194,7 @@ function temporary(x,y,char1,char2,cube)
              }
             else document.getElementById(cubesArray[x][y].id).style.background = "red"
 
-            document.getElementById(cubesArray[x][y].id).style.pointerEvents = "none";
+            document.getElementById(cubesArray[x][y].id).style.pointerEvents = "none"
             cubesReveal(cubesArray[x][y])
     }catch(e){}
 }
