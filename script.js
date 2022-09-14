@@ -1,6 +1,7 @@
 let minesArr = new Set()
 let cubesArray,helper, wasChecked = new Array()
-let interval,firstClick,s_width,s_height,mines,nick = 0
+let interval,firstClick,s_width,s_height,mines,nick,flags = 0
+let nicksDict, valuesDict = {}
 class Cube{
     constructor(){
         this.id = 0
@@ -8,6 +9,7 @@ class Cube{
         this.minesAround = 0
         this.x = 0
         this.y = 0
+        this.isChecked = false
     }
     generateCube()
     {
@@ -24,25 +26,26 @@ function validation()
     s_height = parseInt(document.getElementById("form_height").value)
     mines = parseInt(document.getElementById("form_mines").value)
     nick = document.getElementById("form_nick").value
-
-    if(nick.length == 0 || s_width <= 0 || s_height <=0 || mines <= 2)
+    
+    
+    if(nick.length == 0 || s_width <= 0 || s_height <=0 || mines == 1)
     {
         interval = clearInterval(interval)
         alert("mordo, złe dane")
     }else generateSweeper()
-
+    
 }
 
 
 function generateSweeper(){
-
+    
     const temp = s_width*s_height;
-
+    
     // generate grid with exact same width and height as cubes
     document.getElementById("main_nav").style.width = `${s_width*50}px`
     document.getElementById("main_content").style.width = `${s_width*50}px`
     document.getElementById("main_content").style.height = `${s_height*50}px`
-
+    
     document.getElementById("main_content").style.gridTemplateColumns = `repeat(${s_width}, 50px)`
     document.getElementById("main_content").style.gridTemplateRows = `repeat(${s_height},50px)`
     
@@ -63,14 +66,16 @@ function generateSweeper(){
         document.getElementById("timer").innerText = `${minutes}:${seconds}`
         seconds++
     },100)
-
+    
     // settings reset
     document.getElementById("main_content").style.pointerEvents = "all"
     helper = []
     wasChecked = []
     firstClick = 0
     cubesArray = []
+    flags = mines
     document.getElementById("main_content").innerHTML = ``
+    document.getElementById("flags").textContent = `Flags: ${flags}`
     for(let i=0;i<temp;i++) wasChecked.push(i)
 
     generateMines(mines,temp);
@@ -149,6 +154,7 @@ document.getElementById("main_content").addEventListener("click" ,(event)=>{
 
 function cubesReveal(cube)
 {   
+    cube.isChecked = true
     areYouWinningSon()
     if(cube != 'undefinded')
     {
@@ -182,10 +188,18 @@ function cubesReveal(cube)
 
             }
             else if(checked == true && cube.minesAround != 0){
+                if(document.getElementById(cubesArray[x][y].id).classList.contains("flag")) 
+                {
+                    document.getElementById(cubesArray[x][y].id).classList.remove("flag")
+                    flags++
+                    document.getElementById("flags").textContent = `Flags: ${flags}`
+                }
+                
                 document.getElementById(cube.id).style.pointerEvents = "none"
                 document.getElementById(cube.id).style.background = "blue"
                 document.getElementById(cube.id).innerText = cube.minesAround
-
+                document.getElementById(cubesArray[x][y].id).style.pointerEvents = "none"
+             
                 wasChecked.splice(wasChecked.indexOf(cube.id),1)
             }
             areYouWinningSon()
@@ -198,9 +212,16 @@ function cubesReveal(cube)
 
 function fill(x,y)
 {
+        if(document.getElementById(cubesArray[x][y].id).classList.contains("flag")) 
+        {
+            document.getElementById(cubesArray[x][y].id).classList.remove("flag")
+            flags++
+            document.getElementById("flags").textContent = `Flags: ${flags}`
+        }
         if(cubesArray[x][y].minesAround == 0) 
         {
             document.getElementById(cubesArray[x][y].id).style.background = "yellow"
+            document.getElementById(cubesArray[x][y].id).style.pointerEvents = "none"
 
         }
         if(cubesArray[x][y].minesAround !=0){
@@ -214,23 +235,35 @@ function fill(x,y)
         
 function areYouWinningSon()
 {
-    if(wasChecked.length == 10) 
+    if(wasChecked.length == mines) 
     {
-        // if(confirm("WYGRAŁEŚ SYNU") == true) generateSweeper()
-        // else 
-        document.getElementById("main_content").style.pointerEvents = "none"
+        Array.from(document.getElementsByClassName("one-cube")).forEach(element =>{
+            element.style.pointerEvents = "none"
+        })  
+
         interval = clearInterval(interval)
 
-        minesArr.forEach(element => {
-            document.getElementById(element).style.background = "red"
-        });
+        Array.from(document.getElementsByClassName("one-cube")).forEach(element =>{
+            element.style.pointerEvents = "none"
+        })
+
         alert("siema wygrałeś")
+        // nicksDict[nick] = document.getElementById("timer").innerText
+        // valuesDict[]
+        document.cookie = `nicks=${nicksDict}`
+        document.cookie = `values=${valuesDict}`
+        
     }
 
 }
 function endGame()
 {
     interval = clearInterval(interval)
+
+    Array.from(document.getElementsByClassName("one-cube")).forEach(element =>{
+        element.style.pointerEvents = "none"
+    })
+
     alert("siema przegrałeś")
 
     minesArr.forEach(element => {
@@ -242,14 +275,20 @@ function endGame()
 
 
 document.getElementById("main_content").addEventListener("mouseup" ,(event)=>{
-//event.path[0]
-        if((event.which == 3) || (event.path[0].id != "main_content"))
+    document.getElementById("flags").textContent = `Flags: ${flags}`
+        if(event.which == 3)
         {
-            
-            if(wasChecked.includes([event.path[0].id]))
+            if(helper[event.target.id].isChecked == false && event.target.id != "main_content" && flags != 0)
             {
-                event.path[0].classList.toggle("flag")
-        
+                if(event.target.classList.contains("flag"))
+                {
+                    event.target.classList.remove("flag")
+                    flags++
+                }else 
+                {
+                    flags--
+                    event.target.classList.add("flag")
+                }
             }
         }
 });
