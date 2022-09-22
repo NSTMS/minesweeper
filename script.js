@@ -1,7 +1,8 @@
 let minesArr = new Set()
 let cubesArray,helper, wasChecked = new Array()
-let interval,firstClick,s_width,s_height,mines,nick,flags = 0
-let nicksDict, valuesDict = {}
+let interval,firstClick,s_width,s_height,mines,nick,flags,click_counter = 0
+let formatMap = new Map()
+let valuesMap = new Map()
 class Cube{
     constructor(){
         this.id = 0
@@ -28,7 +29,7 @@ function validation()
     nick = document.getElementById("form_nick").value
     
     
-    if(nick.length == 0 || s_width <= 0 || s_height <=0 || mines == 1)
+    if(nick.length == 0 || s_width <= 0 || s_height <=0 || mines == 1 || s_width*s_height<mines)
     {
         interval = clearInterval(interval)
         alert("mordo, złe dane")
@@ -50,22 +51,6 @@ function generateSweeper(){
     document.getElementById("main_content").style.gridTemplateRows = `repeat(${s_height},50px)`
     
     // document.getElementById("leaderboard").style.height = document.getElementById("main_content").style.height 
-    // set timer
-    interval = clearInterval(interval)
-    let minutes = 0
-    let seconds = 0
-    let time_counter = 0
-    interval = setInterval(() => {
-        seconds = seconds < 10 ? `0${seconds}` : seconds
-        if(seconds % 60 == 0)
-        {
-            time_counter != 0 ? minutes++ : time_counter++
-            minutes = minutes < 10 ? `0${minutes}` : minutes
-            seconds=0
-        }
-        document.getElementById("timer").innerText = `${minutes}:${seconds}`
-        seconds++
-    },100)
     
     // settings reset
     document.getElementById("main_content").style.pointerEvents = "all"
@@ -74,7 +59,9 @@ function generateSweeper(){
     firstClick = 0
     cubesArray = []
     flags = mines
+    click_counter = 0
     document.getElementById("main_content").innerHTML = ``
+    document.getElementById("timer").innerText = `00:00`
     document.getElementById("flags").textContent = `Flags: ${flags}`
     for(let i=0;i<temp;i++) wasChecked.push(i)
 
@@ -237,6 +224,8 @@ function areYouWinningSon()
 {
     if(wasChecked.length == mines) 
     {
+
+
         Array.from(document.getElementsByClassName("one-cube")).forEach(element =>{
             element.style.pointerEvents = "none"
         })  
@@ -247,34 +236,88 @@ function areYouWinningSon()
             element.style.pointerEvents = "none"
         })
 
-        alert("siema wygrałeś")
-        // nicksDict[nick] = document.getElementById("timer").innerText
-        // valuesDict[]
-        document.cookie = `nicks=${nicksDict}`
-        document.cookie = `values=${valuesDict}`
-        
+
+
+        setTimeout(()=>{
+            alert("siema wygrałeś")
+        },0)
+        formatMap.set(nick,`${s_width} ${s_height}`) 
+        console.log(formatMap.get(nick))
+        document.cookie = `nicks=${formatMap.get(nick)}`
+        const list_element = document.createElement("div")
+        list_element.classList.add(`champion`)
+        list_element.innerHTML = `<p>Format: ${formatMap.get(nick)}</p>`
+        document.getElementById("leaders").appendChild(list_element)
+
+
     }
 
 }
 function endGame()
 {
+    setTimeout(()=>{
+        alert("siema przegrałeś")
+    },0)
+
     interval = clearInterval(interval)
 
     Array.from(document.getElementsByClassName("one-cube")).forEach(element =>{
         element.style.pointerEvents = "none"
     })
 
-    alert("siema przegrałeś")
 
     minesArr.forEach(element => {
         document.getElementById(element).style.background = "red"
-    });
+    })
+  
 
+    
+}
+
+
+function showLeaderboard()
+{
+    document.getElementById("here-add-absolute").classList.add("topka-onclick")
+    document.getElementById("leaders").style.display = "block"
+    document.getElementById("TOPKA").style.marginRight="-15px"
+    document.getElementById("title").classList.remove("animation-b")
+    document.getElementById("title").setAttribute("onclick",`hideLeaderboard()`)
+}
+
+function hideLeaderboard()
+{
+    document.getElementById("title").classList.add("animation-b")
+    document.getElementById("leaders").style.display = "none"
+    document.getElementById("here-add-absolute").classList.remove("topka-onclick")
+    document.getElementById("title").setAttribute("onclick",`showLeaderboard()`)
 
 }
 
 
 document.getElementById("main_content").addEventListener("mouseup" ,(event)=>{
+
+    if(click_counter == 0)
+    {      
+            // set timer
+        interval = clearInterval(interval)
+        let minutes = 0
+        let seconds = 0
+        let time_counter = 0
+        console.log("siam")
+        interval = setInterval(() => {
+        seconds = seconds < 10 ? `0${seconds}` : seconds
+        if(seconds % 60 == 0)
+        {
+            time_counter != 0 ? minutes++ : time_counter++
+            minutes = minutes < 10 ? `0${minutes}` : minutes
+            seconds=0
+        }
+        document.getElementById("timer").innerText = `${minutes}:${seconds}`
+        seconds++
+    },100)
+
+        click_counter++;
+    }
     document.getElementById("flags").textContent = `Flags: ${flags}`
         if(event.which == 3)
         {
