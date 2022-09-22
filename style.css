@@ -178,8 +178,6 @@ input::-webkit-inner-spin-button {
 .animation-b{
     animation: animation-backward 0.4s linear;
 }
-
-
 @keyframes animation-backward {
     from{
         width:600px;
@@ -196,3 +194,5 @@ input::-webkit-inner-spin-button {
     }
 
 }
+
+
